@@ -44,7 +44,8 @@ func main() {
 		return
 	}
 	if p == "user-agent" {
-		userAgent := strings.Split(s, " ")[4]
+		userAgent := strings.Split(s, "\r\n")[2]
+		userAgent = strings.Split(userAgent, ": ")[1]
 		fmt.Println("user-agent: ", userAgent)
 		res := fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length:%v\r\n\r\n%s", len(userAgent), userAgent)
 		con.Write([]byte(res))
