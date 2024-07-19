@@ -30,19 +30,26 @@ func main() {
 	}
 	s := string(req[:n])
 	path := strings.Split(s, " ")[1]
+	fmt.Println(path)
 	if path == "/" {
 		con.Write([]byte("HTTP/1.1 200 OK\r\n\r\n"))
 		con.Close()
 		return
 	}
-
-	if strings.Split(path, "/")[1] == "echo" {
+	p := strings.Split(path, "/")[1]
+	if p == "echo" {
 		message := strings.Split(path, "/")[2]
 		res := fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length:%v\r\n\r\n%s", len(message), message)
 		con.Write([]byte(res))
 		return
 	}
-
+	if p == "user-agent" {
+		userAgent := strings.Split(s, " ")[4]
+		fmt.Println("user-agent: ", userAgent)
+		res := fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length:%v\r\n\r\n%s", len(userAgent), userAgent)
+		con.Write([]byte(res))
+		return
+	}
 	con.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
 	con.Close()
 }
