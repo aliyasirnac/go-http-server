@@ -30,6 +30,7 @@ func main() {
 func handleConnection(con net.Conn) {
 	defer con.Close()
 	for {
+
 		req := make([]byte, 1024)
 		n, err := con.Read(req)
 		if err != nil {
@@ -58,7 +59,25 @@ func handleConnection(con net.Conn) {
 			con.Write([]byte(res))
 			return
 		}
-		con.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
-	}
+		if p == "files" {
+			dir := os.Args[2]
+			fileName := strings.TrimPrefix(path, "/files/")
+			fmt.Print(fileName)
+			data, err := os.ReadFile(dir + fileName)
 
+			if err != nil {
+
+				con.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
+				return
+			}
+
+			response := fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: %d\r\n\r\n%s", len(data), data)
+
+			con.Write([]byte(response))
+			return
+		}
+		fmt.Println("not found")
+		con.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
+
+	}
 }
