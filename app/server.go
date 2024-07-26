@@ -64,7 +64,6 @@ func handleConnection(con net.Conn) {
 			}
 
 			if strings.Contains(encoding, "gzip") {
-				// Gzip sıkıştırmasını burada uygulayın
 				var b strings.Builder
 				gz := gzip.NewWriter(&b)
 				gz.Write([]byte(message))
