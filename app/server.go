@@ -37,8 +37,11 @@ func handleConnection(con net.Conn) {
 			return
 		}
 		s := string(req[:n])
+		splitted := strings.Split(s, "\r\n")
 		path := strings.Split(s, " ")[1]
-		fmt.Println(path)
+		requestLine := strings.Fields(s)
+		method := requestLine[0]
+		fmt.Println("requestLine", splitted[len(splitted)-1])
 		if path == "/" {
 			con.Write([]byte("HTTP/1.1 200 OK\r\n\r\n"))
 			con.Close()
@@ -62,11 +65,22 @@ func handleConnection(con net.Conn) {
 		if p == "files" {
 			dir := os.Args[2]
 			fileName := strings.TrimPrefix(path, "/files/")
-			fmt.Print(fileName)
+
+			if method == "POST" {
+				content := strings.Trim(splitted[len(splitted)-1], "\x00")
+				err := os.WriteFile(dir+fileName, []byte(content), 0644)
+
+				if err != nil {
+					con.Write([]byte("HTTP/1.1 500 Internal Server Error\r\n\r\n"))
+					return
+				}
+				con.Write([]byte("HTTP/1.1 201 Created\r\n\r\n"))
+				return
+			}
+			fmt.Println("buraya girdi")
 			data, err := os.ReadFile(dir + fileName)
 
 			if err != nil {
-
 				con.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
 				return
 			}
@@ -76,7 +90,6 @@ func handleConnection(con net.Conn) {
 			con.Write([]byte(response))
 			return
 		}
-		fmt.Println("not found")
 		con.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
 
 	}
